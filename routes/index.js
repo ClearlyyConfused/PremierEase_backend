@@ -11,15 +11,11 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/LeagueStandings', function (req, res, next) {
-	// create new database item
-	const newDatabaseSchema = new LeagueStandingsSchema({
-		teamName: 'TeamName',
-		teamPosition: 1,
-	});
-
-	// save database item
-	newDatabaseSchema.save();
-	res.send('Success');
+	async function getLeagueStandings() {
+		return await LeagueStandingsSchema.findById('64599085c4e8574470f56317').exec();
+	}
+	console.log(getLeagueStandings());
+	getLeagueStandings().then((item) => res.json(item));
 });
 
 cron.schedule('*/10 * * * * *', function () {

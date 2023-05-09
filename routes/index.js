@@ -7,18 +7,19 @@ var LeagueStandingsSchema = require('../schemas/league_standings');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-	res.render('index', { title: 'Express' });
+	res.json('Matchday Madness API');
 });
 
+// GET league standings info from database
 router.get('/LeagueStandings', function (req, res, next) {
 	async function getLeagueStandings() {
 		return await LeagueStandingsSchema.findById('64599085c4e8574470f56317').exec();
 	}
-	console.log(getLeagueStandings());
 	getLeagueStandings().then((item) => res.json(item));
 });
 
-cron.schedule('*/10 * * * * *', function () {
+// update database every 30 seconds using API
+cron.schedule('*/30 * * * * *', function () {
 	console.log('Fetching standings');
 
 	const reqOptions = {

@@ -94,6 +94,14 @@ cron.schedule('*/30 * * * * *', function () {
 		});
 });
 
+// GET league news info from database
+router.get('/LeagueNews', function (req, res, next) {
+	async function getLeagueNews() {
+		return await LeagueNews.findById('645feca5ad425349e2db3f2e').exec();
+	}
+	getLeagueNews().then((item) => res.json(item));
+});
+
 // update league news info every 30 seconds using API if they were last updated more than 12 hours ago
 cron.schedule('*/30 * * * * *', function () {
 	const currentTime = new Date();

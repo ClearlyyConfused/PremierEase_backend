@@ -5,6 +5,9 @@ var axios = require('axios').default;
 var router = express.Router();
 var LeagueStandingsSchema = require('../schemas/league_standings');
 var LeagueMatches = require('../schemas/league_matches');
+var LeagueNews = require('../schemas/league_news');
+const SerpApi = require('google-search-results-nodejs');
+const search = new SerpApi.GoogleSearch(process.env.API2TOKEN);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -89,6 +92,38 @@ cron.schedule('*/30 * * * * *', function () {
 			}
 			update();
 		});
+});
+
+// update league news info every 30 seconds using API if they were last updated more than 12 hours ago
+cron.schedule('*/30 * * * * *', function () {
+	const currentTime = new Date();
+
+	const params = {
+		q: 'premier league',
+		tbm: 'nws',
+		location: 'Austin, TX, Texas, United States',
+	};
+
+	async function getLeagueMatches() {
+		return await LeagueNews.findById('645feca5ad425349e2db3f2e').exec();
+	}
+	getLeagueMatches().then((item) => {
+		const timeSinceLastUpdate = Math.abs(currentTime - item.lastUpdated) / 36e5;
+		if (timeSinceLastUpdate >= 12) {
+			console.log('Fetching news');
+			search.json(params, (response) => {
+				var news = new LeagueNews({
+					_id: '645feca5ad425349e2db3f2e',
+					news: response,
+					lastUpdated: currentTime,
+				});
+				async function update() {
+					await LeagueNews.findByIdAndUpdate('645feca5ad425349e2db3f2e', news).exec();
+				}
+				update();
+			});
+		}
+	});
 });
 
 module.exports = router;

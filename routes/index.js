@@ -1,6 +1,5 @@
 require('dotenv').config();
 var express = require('express');
-var cron = require('node-cron');
 var axios = require('axios').default;
 var router = express.Router();
 var LeagueStandingsSchema = require('../schemas/league_standings');
@@ -46,16 +45,18 @@ router.get('/LeagueStandings', function (req, res, next) {
 
 					// update the database item
 					async function update() {
-						await LeagueStandingsSchema.findByIdAndUpdate(
+						const updatedStandings = await LeagueStandingsSchema.findByIdAndUpdate(
 							'64599085c4e8574470f56317',
-							newDatabaseSchema
+							newDatabaseSchema,
+							{ new: true }
 						).exec();
+						res.json(updatedStandings);
 					}
 					update();
 				});
+		} else {
+			res.json(item);
 		}
-
-		res.json(item);
 	});
 });
 
@@ -81,7 +82,7 @@ router.get('/LeagueMatches', function (req, res, next) {
 			axios
 				.get('http://api.football-data.org/v4/competitions/PL/matches', reqOptions)
 				.then(function (response) {
-					var standings = new LeagueMatches({
+					var matches = new LeagueMatches({
 						_id: '645d3b3c7a93d18976432e2a',
 						matches: response.data.matches,
 						randNum: Math.floor(Math.random() * 100),
@@ -89,16 +90,18 @@ router.get('/LeagueMatches', function (req, res, next) {
 					});
 
 					async function update() {
-						await LeagueMatches.findByIdAndUpdate(
+						const updatedLeagueMatches = await LeagueMatches.findByIdAndUpdate(
 							'645d3b3c7a93d18976432e2a',
-							standings
+							matches,
+							{ new: true }
 						).exec();
+						res.json(updatedLeagueMatches);
 					}
 					update();
 				});
+		} else {
+			res.json(item);
 		}
-
-		res.json(item);
 	});
 });
 
@@ -126,13 +129,18 @@ router.get('/LeagueNews', function (req, res, next) {
 					lastUpdated: currentTime,
 				});
 				async function update() {
-					await LeagueNews.findByIdAndUpdate('645feca5ad425349e2db3f2e', news).exec();
+					const updatedLeagueNews = await LeagueNews.findByIdAndUpdate(
+						'645feca5ad425349e2db3f2e',
+						news,
+						{ new: true }
+					).exec();
+					res.json(updatedLeagueNews);
 				}
 				update();
 			});
+		} else {
+			res.json(item);
 		}
-
-		res.json(item);
 	});
 });
 

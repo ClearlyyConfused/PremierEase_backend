@@ -5,6 +5,7 @@ var router = express.Router();
 var LeagueStandingsSchema = require('../schemas/league_standings');
 var LeagueMatches = require('../schemas/league_matches');
 var LeagueNews = require('../schemas/league_news');
+var LeagueTeams = require('../schemas/league_teams');
 const SerpApi = require('google-search-results-nodejs');
 const search = new SerpApi.GoogleSearch(process.env.API2TOKEN);
 
@@ -105,6 +106,52 @@ router.get('/LeagueMatches', function (req, res, next) {
 	});
 });
 
+// GET league teams info
+router.get('/LeagueTeams', function (req, res, next) {
+	const currentTime = new Date();
+
+	const reqOptions = {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-Auth-Token': process.env.APITOKEN,
+		},
+	};
+
+	async function getLeagueTeams() {
+		return await LeagueTeams.findById('64a4c7c6c5f1a1d3c737c994').exec();
+	}
+
+	getLeagueTeams().then((item) => {
+		const timeSinceLastUpdate = Math.abs(currentTime - item.lastUpdated) / 36e5;
+
+		if (timeSinceLastUpdate >= 12) {
+			axios
+				.get('http://api.football-data.org/v4/competitions/PL/teams', reqOptions)
+				.then(function (response) {
+					var teams = new LeagueTeams({
+						_id: '64a4c7c6c5f1a1d3c737c994',
+						teamsInfo: response.data.teams,
+						randNum: Math.floor(Math.random() * 100),
+						lastUpdated: currentTime,
+					});
+
+					async function update() {
+						const updatedLeagueTeams = await LeagueTeams.findByIdAndUpdate(
+							'64a4c7c6c5f1a1d3c737c994',
+							teams,
+							{ new: true }
+						).exec();
+						res.json(updatedLeagueTeams);
+					}
+					update();
+				});
+		} else {
+			res.json(item);
+		}
+	});
+});
+
 // GET league news info from database
 router.get('/LeagueNews', function (req, res, next) {
 	const currentTime = new Date();
@@ -129,11 +176,9 @@ router.get('/LeagueNews', function (req, res, next) {
 					lastUpdated: currentTime,
 				});
 				async function update() {
-					const updatedLeagueNews = await LeagueNews.findByIdAndUpdate(
-						'645feca5ad425349e2db3f2e',
-						news,
-						{ new: true }
-					).exec();
+					const updatedLeagueNews = await LeagueNews.findByIdAndUpdate('645feca5ad425349e2db3f2e', news, {
+						new: true,
+					}).exec();
 					res.json(updatedLeagueNews);
 				}
 				update();

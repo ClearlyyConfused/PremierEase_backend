@@ -6,6 +6,7 @@ var LeagueStandingsSchema = require('../schemas/league_standings');
 var LeagueMatches = require('../schemas/league_matches');
 var LeagueNews = require('../schemas/league_news');
 var LeagueTeams = require('../schemas/league_teams');
+var LeagueNewsImages = require('../schemas/league_news_images');
 const SerpApi = require('google-search-results-nodejs');
 const search = new SerpApi.GoogleSearch(process.env.API2TOKEN);
 
@@ -146,6 +147,59 @@ router.get('/LeagueTeams', function (req, res, next) {
 					}
 					update();
 				});
+		} else {
+			res.json(item);
+		}
+	});
+});
+
+function formatDate(date) {
+	// Subtract one day
+	date.setDate(date.getDate() - 1);
+
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+}
+
+// GET league news images info from database
+router.get('/LeagueNewsImages', function (req, res, next) {
+	const currentTime = new Date();
+
+	const params = {
+		q: 'premier league site:90min.com after:' + formatDate(currentTime),
+		tbm: 'nws',
+		location: 'Austin, TX, Texas, United States',
+		engine: 'google_images',
+	};
+
+	async function getLeagueNewsImages() {
+		return await LeagueNewsImages.findById('64a890fdee2d13e463dac47b').exec();
+	}
+
+	getLeagueNewsImages().then((item) => {
+		const timeSinceLastUpdate = Math.abs(currentTime - item.lastUpdated) / 36e5;
+
+		if (timeSinceLastUpdate >= 12) {
+			search.json(params, (response) => {
+				var newsImages = new LeagueNewsImages({
+					_id: '64a890fdee2d13e463dac47b',
+					newsImages: response,
+					lastUpdated: currentTime,
+				});
+				async function update() {
+					const updatedLeagueNewsImages = await LeagueNewsImages.findByIdAndUpdate(
+						'64a890fdee2d13e463dac47b',
+						newsImages,
+						{
+							new: true,
+						}
+					).exec();
+					res.json(updatedLeagueNewsImages);
+				}
+				update();
+			});
 		} else {
 			res.json(item);
 		}

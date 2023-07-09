@@ -168,7 +168,7 @@ router.get('/LeagueNewsImages', function (req, res, next) {
 	const currentTime = new Date();
 
 	const params = {
-		q: 'premier league site:90min.com after:' + formatDate(currentTime),
+		q: 'premier league news after:' + formatDate(currentTime),
 		tbm: 'nws',
 		location: 'Austin, TX, Texas, United States',
 		engine: 'google_images',

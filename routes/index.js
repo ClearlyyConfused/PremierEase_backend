@@ -12,7 +12,7 @@ const search = new SerpApi.GoogleSearch(process.env.API2TOKEN);
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-	res.json('Matchday Madness API');
+	res.json('Premier Ease API');
 });
 
 // GET league standings info from database

@@ -7,7 +7,7 @@ Backend for Premier Ease. Fetches information from external APIs and stores it i
 
 ## Deployment 🚀
 
-https://matchday-madness-backend.vercel.app/
+https://premier-ease-backend.vercel.app/
 
 ## API Reference 🧩
 

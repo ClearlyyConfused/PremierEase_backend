@@ -167,11 +167,18 @@ function formatDate(date) {
 router.get('/LeagueNewsImages', function (req, res, next) {
 	const currentTime = new Date();
 
+	/*
 	const params = {
 		q: 'premier league news after:' + formatDate(currentTime),
 		tbm: 'nws',
 		location: 'Austin, TX, Texas, United States',
 		engine: 'google_images',
+	};
+	*/
+
+	const params = {
+		search_query: 'premier league news',
+		engine: 'youtube',
 	};
 
 	async function getLeagueNewsImages() {
@@ -206,6 +213,7 @@ router.get('/LeagueNewsImages', function (req, res, next) {
 	});
 });
 
+/*
 // GET league news info from database
 router.get('/LeagueNews', function (req, res, next) {
 	const currentTime = new Date();
@@ -242,5 +250,6 @@ router.get('/LeagueNews', function (req, res, next) {
 		}
 	});
 });
+*/
 
 module.exports = router;
